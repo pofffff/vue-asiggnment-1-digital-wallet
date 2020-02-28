@@ -16,9 +16,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$black: #222222;
-$grey: rgba(34, 34, 34, 0.6);
-
+@import "../assets/scss/variables.scss";
 .header {
   font-family: "Source Sans Pro";
   height: 6rem;
@@ -26,18 +24,19 @@ $grey: rgba(34, 34, 34, 0.6);
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 0.5rem;
 
   h1 {
     font-size: 2.2rem;
     font-weight: bold;
-    color: $black;
+    color: $h1;
   }
 
   span {
     font-size: 0.8rem;
     font-weight: 600;
 
-    color: $grey;
+    color: $span;
   }
 }
 </style>

@@ -1,8 +1,11 @@
 <template>
   <div class="container">
     <Top headline="Add New Card" span="New Card" />
-    <Card class="card" />
-    <CardForm @add="add" />
+    <Card :card="card" />
+    <CardForm @add="add" @update="update" />
+    <div class="button">
+      <button @click="add">Add Card</button>
+    </div>
   </div>
 </template>
 
@@ -21,30 +24,25 @@ export default {
   },
   data: () => {
     return {
+      card: {},
       cards: []
     };
   },
-  watch: {
-    cards() {
-      localStorage.setItem("cards", JSON.stringify(this.cards));
-    }
-  },
+
   methods: {
-    add(input) {
+    update(input) {
+      this.card = input;
+    },
+    add() {
       if (localStorage.getItem("cards")) {
         this.cards = JSON.parse(localStorage.getItem("cards"));
-        this.cards.push(input);
-
+        this.cards.push(this.card);
+        localStorage.setItem("cards", JSON.stringify(this.cards));
+      } else {
+        this.cards.push(this.card);
         localStorage.setItem("cards", JSON.stringify(this.cards));
       }
-      this.$router.push("/", this.cards);
-    }
-  },
-  mounted() {
-    if (localStorage.getItem("cards")) {
-      this.cards = JSON.parse(localStorage.getItem("cards"));
-    } else {
-      localStorage.setItem("cards", JSON.stringify(this.cards));
+      this.$router.push("/");
     }
   }
 };
@@ -52,14 +50,18 @@ export default {
 
 
 <style lang="scss" scoped>
-$yellow: #ffae34;
-$black: #222222;
-$shadow: 0px 0px 8px rgba(0, 0, 0, 0.25);
-$mono: "PT Mono";
+@import "../assets/scss/variables.scss";
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  .button {
+    button {
+      background-color: black;
+      color: white;
+    }
+  }
 }
 </style>

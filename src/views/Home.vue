@@ -1,9 +1,16 @@
 <template>
   <div class="container">
     <Top headline="E - Wallet" span="Active Card" />
-    <Card :cards="cards" />
+    <Card :card="card" class="active" />
     <section class="card-holder">
-      <CardStack :cards="cards" v-for="(card, index) in cardss" :key="index" class="cards" />
+      <CardStack :cards="cards" @setCard="setCard" class="cardStack" />
+      <section v-if="btnOverlay" class="btn-overlay">
+        <button @click="close" class="close">
+          <i class="fas fa-times"></i>
+        </button>
+        <button @click="active" class="set-card">Set Active</button>
+        <button @click="remove" class="set-card">Delete</button>
+      </section>
     </section>
     <div class="button">
       <button @click="add">add new card</button>
@@ -21,61 +28,92 @@ export default {
   components: { Top, Card, CardStack },
   data: () => {
     return {
-      cardss: [
-        {
-          number: "123",
-          holder: "123",
-          valid: "123",
-          cvc: "123",
-          vendor: "123"
-        }
-      ]
+      storage: localStorage.getItem("cards"),
+      cards: [],
+      btnOverlay: false,
+      card: {},
+      index: ""
     };
   },
-  // hämta local storage istället för skicka params?
+  watch: {
+    storage() {
+      this.cards = JSON.parse(this.storage);
+    }
+  },
   methods: {
     add() {
       this.$router.push("/AddCard");
+    },
+    setCard(index) {
+      console.log(index);
+      this.index = index;
+      this.btnOverlay = true;
+    },
+    active() {
+      this.card = this.cards[this.index];
+      this.btnOverlay = false;
+    },
+    remove() {
+      console.log(this.index);
+      this.cards.splice(this.index, 1);
+      localStorage.setItem("cards", JSON.stringify(this.cards));
+      this.btnOverlay = false;
+      this.card = {};
+    },
+    close() {
+      this.btnOverlay = false;
+    }
+  },
+  mounted() {
+    if (localStorage.getItem("cards")) {
+      this.cards = JSON.parse(localStorage.getItem("cards"));
+    } else {
+      localStorage.setItem("cards", JSON.stringify(this.cards));
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-$black: #222222;
-$mono: "PT Mono";
+@import "../assets/scss/variables.scss";
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
 
+  .active {
+    height: 15rem;
+  }
+
   .card-holder {
     display: flex;
     flex-direction: column;
-    max-height: 300px;
-    .cards {
-      max-height: 4rem;
-    }
+    margin-top: 6.5rem;
   }
-  .button {
+
+  .btn-overlay {
+    width: 20rem;
+    height: 15rem;
+    background: $white;
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
     position: absolute;
-    bottom: 3rem;
-    button {
-      width: 24rem;
-      height: 5rem;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    border-radius: 10px;
+    box-shadow: $shadow;
+
+    .close {
       display: flex;
-      justify-content: center;
-      border: solid 1px black;
-      border-radius: 8px;
-      text-transform: uppercase;
-      font-family: $mono;
-      font-size: 1.4rem;
-      font-weight: bold;
-      cursor: pointer;
+      align-self: flex-end;
+      justify-content: flex-start;
+      margin: -2rem 0.75rem 0 0;
+      color: $black1;
       background: none;
+      border: none;
+      font-size: 1.5rem;
     }
   }
 }

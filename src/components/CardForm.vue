@@ -1,30 +1,63 @@
 <template>
-  <div class="form">
-    <label for="number">Card Number</label>
-    <input type="text" name="number" v-model="number" />
-    <label for="holder">Card Holder</label>
-    <input type="text" name="holder" v-model="holder" />
+  <div class="form" @input="update">
+    <label for="vendor">Vendor</label>
+    <select name="vendor" id="vendor" v-model="input.vendor">
+      <option style="display: none">Select</option>
+      <option value="bitcoin">Bitcoin Inc</option>
+      <option value="ninja">Ninja Bank</option>
+      <option value="blockchain">Block Chain Inc</option>
+      <option value="evil">Evil Corp</option>
+    </select>
+    <label for="number">
+      Card Number
+      <span v-if="errNumber" class="error">Enter a valid number</span>
+    </label>
+    <input
+      type="text"
+      name="number"
+      v-model="input.number"
+      placeholder="xxxx xxxx xxxx xxxx"
+      maxlength="16"
+    />
+    <label for="holder">
+      Card Holder
+      <span v-if="errHolder" class="error">Enter a valid name</span>
+    </label>
+    <input
+      type="text"
+      name="holder"
+      v-model="input.holder"
+      placeholder="Firstname Lastname"
+      maxlength="24"
+    />
     <section class="split">
       <div class="numbers">
-        <label for="valid">Valid Thru</label>
-        <input class="input" type="text" name="valid" v-model="valid" />
+        <label for="valid">
+          Valid Thru
+          <span v-if="errValid" class="error">mm/yy</span>
+        </label>
+        <input
+          class="input"
+          type="text"
+          name="valid"
+          v-model="input.valid"
+          placeholder="MM/YY"
+          maxlength="5"
+        />
       </div>
       <div class="numbers">
         <label for="cvc">CVC</label>
-        <input class="input" type="text" name="cvc" v-model="cvc" />
+        <input
+          class="input"
+          type="text"
+          name="cvc"
+          v-model="input.cvc"
+          placeholder="xxx"
+          maxlength="3"
+        />
       </div>
     </section>
-    <label for="vendor">Vendor</label>
-    <select name="vendor" id="vendor" v-model="vendor">
-      <option style="display: none">Select</option>
-      <option value="bitcoin inc">Bitcoin Inc</option>
-      <option value="ninja bank">Ninja Bank</option>
-      <option value="block chain inc">Block Chain Inc</option>
-      <option value="evil corp">Evil Corp</option>
-    </select>
-    <div class="button">
-      <button @click="add">Add Card</button>
-    </div>
+    <span v-if="errDate" class="error span">Not a valid year</span>
   </div>
 </template>
 
@@ -32,33 +65,79 @@
 export default {
   data: () => {
     return {
-      number: "",
-      holder: "",
-      valid: "",
-      cvc: "",
-      vendor: ""
+      input: {
+        vendor: "",
+        number: "",
+        holder: "",
+        valid: "",
+        cvc: ""
+      },
+      errNumber: false,
+      errHolder: false,
+      errValid: false,
+      errDate: false
     };
   },
   methods: {
-    add() {
-      const input = {
-        number: this.number,
-        holder: this.holder,
-        valid: this.valid,
-        cvc: this.cvc,
-        vendor: this.vendor
-      };
-      this.$emit("add", input);
+    update() {
+      // Validation of inputs
+      if (this.valNumber(this.input.number) === false) {
+        this.errNumber = true;
+      } else {
+        this.errNumber = false;
+      }
+      if (this.valHolder(this.input.holder) === false) {
+        this.errHolder = true;
+      } else {
+        this.errHolder = false;
+      }
+
+      if (!this.valValid(this.input.valid)) {
+        this.errValid = true;
+      } else {
+        this.errValid = false;
+      }
+
+      if (this.validDate(this.input.valid) === false) {
+        this.errDate = true;
+      } else {
+        this.errDate = false;
+      }
+
+      this.$emit("update", this.input);
+    },
+    valNumber(number) {
+      if (number.length < 16) {
+        return false;
+      }
+    },
+    valHolder(holder) {
+      const pattern = /^[a-zA-Z]+ [a-zA-Z]+$/;
+      return pattern.test(holder);
+    },
+    valValid(valid) {
+      const pattern = /^(0[1-9]|1[012])\/\d{2}$/;
+      return pattern.test(valid);
+    },
+    validDate(date) {
+      let d = new Date();
+      let year = d.getFullYear();
+      year = year.toString().split("");
+      const yy = year[2] + year[3];
+      const yyMax = (Number(yy) + 5).toString();
+      const input = date.split("/");
+      const inputYear = input[1];
+
+      if (inputYear < yy || inputYear > yyMax) {
+        return false;
+      }
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-$mono: "PT Mono";
-$grey: rgba(0, 0, 0, 0.8);
-$black: #222222;
-$yellow: #ffae34;
+@import "../assets/scss/variables.scss";
 
 .form {
   width: 24rem;
@@ -66,6 +145,16 @@ $yellow: #ffae34;
   display: flex;
   flex-direction: column;
   font-family: $mono;
+
+  .error {
+    color: red;
+  }
+
+  .span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
 
   .split {
     display: grid;
@@ -86,15 +175,15 @@ $yellow: #ffae34;
 
   label {
     font-size: 0.8rem;
-    color: $grey;
+    color: $black1;
     font-weight: 600;
   }
 
   input {
     margin: 5px 0 15px 0;
     padding: 1rem;
-    color: $black;
-    border: 1px solid $black;
+    color: $black1;
+    border: 1px solid $black2;
     font-family: $mono;
     font-size: 1.1rem;
     font-weight: 600;
@@ -105,36 +194,13 @@ $yellow: #ffae34;
   select {
     margin: 5px 0 15px 0;
     padding: 1rem;
-    color: $black;
-    border: 1px solid $black;
+    color: $black2;
+    border: 1px solid $black2;
     font-family: $mono;
     font-size: 1.1rem;
     font-weight: 600;
     text-transform: uppercase;
     border-radius: 8px;
-  }
-}
-
-.button {
-  display: flex;
-  justify-content: flex-end;
-  position: absolute;
-  bottom: 3rem;
-  button {
-    width: 24rem;
-    height: 5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: solid 1px black;
-    border-radius: 8px;
-    text-transform: uppercase;
-    font-family: $mono;
-    font-size: 1.4rem;
-    font-weight: bold;
-    cursor: pointer;
-    color: white;
-    background: black;
   }
 }
 </style>

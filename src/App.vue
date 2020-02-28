@@ -5,15 +5,15 @@
 </template>
 <script>
 export default {
-  /* 
-font-family: 'Source Sans Pro', ;
-font-family: 'PT Mono', ;
- */
+  data: () => {
+    return {};
+  }
 };
 </script>
 
 <style lang="scss">
-$shadow: 6px 6px 26px -8px rgba(0, 0, 0, 0.52);
+@import "./assets/scss/button.scss";
+@import "./assets/scss/variables.scss";
 
 * {
   margin: 0;
@@ -32,9 +32,9 @@ $shadow: 6px 6px 26px -8px rgba(0, 0, 0, 0.52);
 
 .wallet {
   padding: 2rem 0 1rem 0;
-  background: white;
+  background: $white;
   width: 26rem;
   height: 56rem;
-  box-shadow: $shadow;
+  box-shadow: $appShadow;
 }
 </style>
