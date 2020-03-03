@@ -1,15 +1,11 @@
 <template>
   <div id="app">
-    <router-view class="wallet" />
+    <vue-page-transition name="fade-in-up">
+      <router-view class="wallet" />
+    </vue-page-transition>
   </div>
 </template>
-<script>
-export default {
-  data: () => {
-    return {};
-  }
-};
-</script>
+
 
 <style lang="scss">
 @import "./assets/scss/button.scss";

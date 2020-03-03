@@ -7,7 +7,6 @@
 
 <script>
 export default {
-  name: "Top",
   props: {
     headline: String,
     span: String

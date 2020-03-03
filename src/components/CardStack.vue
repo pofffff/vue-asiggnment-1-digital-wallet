@@ -9,7 +9,6 @@
 <script>
 import Card from "../components/Card";
 export default {
-  name: "CardStack",
   components: {
     Card
   },
@@ -28,8 +27,7 @@ export default {
 .cards {
   height: 24rem;
 
-  .cardWrapper:last-child,
-  .cardWrapper:hover {
+  .cardWrapper:last-child {
     overflow: visible;
   }
 

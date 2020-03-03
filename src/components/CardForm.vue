@@ -1,7 +1,10 @@
 <template>
   <div class="form" @input="update">
-    <label for="vendor">Vendor</label>
-    <select name="vendor" id="vendor" v-model="input.vendor">
+    <label for="vendor">
+      Vendor
+      <span v-if="invalid.vendor" class="error">Must choose vendor</span>
+    </label>
+    <select v-model="vendor" name="vendor" id="vendor">
       <option style="display: none">Select</option>
       <option value="bitcoin">Bitcoin Inc</option>
       <option value="ninja">Ninja Bank</option>
@@ -10,23 +13,23 @@
     </select>
     <label for="number">
       Card Number
-      <span v-if="errNumber" class="error">Enter a valid number</span>
+      <span v-if="invalid.number" class="error">Enter a valid number</span>
     </label>
     <input
+      v-model="number"
       type="text"
       name="number"
-      v-model="input.number"
       placeholder="xxxx xxxx xxxx xxxx"
       maxlength="16"
     />
     <label for="holder">
       Card Holder
-      <span v-if="errHolder" class="error">Enter a valid name</span>
+      <span v-if="invalid.holder" class="error">Enter a valid name</span>
     </label>
     <input
+      v-model="holder"
       type="text"
       name="holder"
-      v-model="input.holder"
       placeholder="Firstname Lastname"
       maxlength="24"
     />
@@ -34,30 +37,26 @@
       <div class="numbers">
         <label for="valid">
           Valid Thru
-          <span v-if="errValid" class="error">mm/yy</span>
+          <span v-if="invalid.valid" class="error">mm/yy</span>
         </label>
         <input
+          v-model="valid"
           class="input"
           type="text"
           name="valid"
-          v-model="input.valid"
           placeholder="MM/YY"
           maxlength="5"
         />
       </div>
       <div class="numbers">
-        <label for="cvc">CVC</label>
-        <input
-          class="input"
-          type="text"
-          name="cvc"
-          v-model="input.cvc"
-          placeholder="xxx"
-          maxlength="3"
-        />
+        <label for="cvc">
+          CVC
+          <span v-if="invalid.cvc" class="error">xxx</span>
+        </label>
+        <input v-model="cvc" class="input" type="text" name="cvc" placeholder="xxx" maxlength="3" />
       </div>
     </section>
-    <span v-if="errDate" class="error span">Not a valid year</span>
+    <span v-if="invalid.date" class="error span">Not a valid year</span>
   </div>
 </template>
 
@@ -65,47 +64,97 @@
 export default {
   data: () => {
     return {
-      input: {
-        vendor: "",
-        number: "",
-        holder: "",
-        valid: "",
-        cvc: ""
-      },
-      errNumber: false,
-      errHolder: false,
-      errValid: false,
-      errDate: false
+      vendor: "",
+      number: "",
+      holder: "",
+      valid: "",
+      cvc: "",
+      invalid: {
+        vendor: false,
+        number: false,
+        holder: false,
+        valid: false,
+        date: false,
+        cvc: false
+      }
     };
+  },
+  watch: {
+    // Validation of inputs
+    vendor() {
+      if (this.vendor === "") {
+        this.invalid.vendor = true;
+      } else {
+        this.invalid.vendor = false;
+      }
+    },
+    number() {
+      // Must be 16 numbers
+      if (this.valNumber(this.number) === false) {
+        this.invalid.number = true;
+      } else {
+        this.invalid.number = false;
+      }
+    },
+    holder() {
+      // Two words with only letters
+      if (this.valHolder(this.holder) === false) {
+        this.invalid.holder = true;
+      } else {
+        this.invalid.holder = false;
+      }
+    },
+    valid() {
+      // Written xx/xx
+      if (!this.valValid(this.valid)) {
+        this.invalid.valid = true;
+      } else {
+        this.invalid.valid = false;
+      }
+
+      // Month 01-12 and year not before this year and max 3 years ahead from now
+      if (this.valDate(this.valid) === false) {
+        this.invalid.date = true;
+      } else {
+        this.invalid.date = false;
+      }
+    },
+    cvc() {
+      // Must be 3 numbers
+      if (this.valCVC(this.cvc) === false) {
+        this.invalid.cvc = true;
+      } else {
+        this.invalid.cvc = false;
+      }
+    }
   },
   methods: {
     update() {
-      // Validation of inputs
-      if (this.valNumber(this.input.number) === false) {
-        this.errNumber = true;
-      } else {
-        this.errNumber = false;
-      }
-      if (this.valHolder(this.input.holder) === false) {
-        this.errHolder = true;
-      } else {
-        this.errHolder = false;
+      const input = {
+        vendor: this.vendor,
+        number: this.number,
+        holder: this.holder,
+        valid: this.valid,
+        cvc: this.cvc,
+        isValid: false
+      };
+      // Check if all validate: {keys} are false
+      const allKeysFalse = Object.keys(this.invalid).every(
+        k => !this.invalid[k]
+      );
+
+      if (allKeysFalse === true) {
+        // If true, check if any input: {key} is empty
+        const emptyKey = Object.keys(input).some(key => input[key] === "");
+        if (emptyKey === false) {
+          input.isValid = true;
+        }
       }
 
-      if (!this.valValid(this.input.valid)) {
-        this.errValid = true;
-      } else {
-        this.errValid = false;
-      }
-
-      if (this.validDate(this.input.valid) === false) {
-        this.errDate = true;
-      } else {
-        this.errDate = false;
-      }
-
-      this.$emit("update", this.input);
+      // Send to AddCard
+      this.$emit("update", input);
     },
+    // Validation methods
     valNumber(number) {
       if (number.length < 16) {
         return false;
@@ -119,18 +168,22 @@ export default {
       const pattern = /^(0[1-9]|1[012])\/\d{2}$/;
       return pattern.test(valid);
     },
-    validDate(date) {
+    valDate(date) {
       let d = new Date();
       let year = d.getFullYear();
       year = year.toString().split("");
       const yy = year[2] + year[3];
-      const yyMax = (Number(yy) + 5).toString();
+      const yyMax = (Number(yy) + 3).toString();
       const input = date.split("/");
       const inputYear = input[1];
 
       if (inputYear < yy || inputYear > yyMax) {
         return false;
       }
+    },
+    valCVC(cvc) {
+      const pattern = /\d{3}/;
+      return pattern.test(cvc);
     }
   }
 };
@@ -175,14 +228,14 @@ export default {
 
   label {
     font-size: 0.8rem;
-    color: $black1;
+    color: $black2;
     font-weight: 600;
   }
 
   input {
     margin: 5px 0 15px 0;
     padding: 1rem;
-    color: $black1;
+    color: $black2;
     border: 1px solid $black2;
     font-family: $mono;
     font-size: 1.1rem;

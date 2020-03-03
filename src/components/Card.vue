@@ -10,7 +10,6 @@
       </div>
       <div class="holder">
         <p class="label">Card Holder</p>
-
         <p>{{holder}}</p>
       </div>
       <div class="valid">
@@ -23,7 +22,6 @@
 
 <script>
 export default {
-  name: "Card",
   props: {
     card: Object
   },
@@ -36,6 +34,9 @@ export default {
     };
   },
   computed: {
+    // Default will display until there is an input
+    // As vendor change the card's bg-color will change
+    // along with dark or light font-color
     number() {
       if (!this.card.number) {
         return this.defaultNumber;
@@ -66,7 +67,6 @@ export default {
         return this.card.vendor;
       }
     },
-
     chip() {
       let chip = "dark";
       if (!this.card.vendor) {
@@ -105,22 +105,21 @@ export default {
 }
 
 .bitcoin {
-  background-color: $bitcoin;
+  background-color: $yellow;
 }
 .ninja {
-  background-color: $ninja;
+  background-color: $black;
 }
 .blockchain {
-  background-color: $blockchain;
+  background-color: $purple;
 }
 .evil {
-  background-color: $evil;
+  background-color: $red;
 }
 .dark {
-  color: $black1;
+  color: $black;
   text-shadow: -0.5px 0.5px 0px #3a3a3a;
 }
-
 .light {
   color: $white;
   text-shadow: 0.5px 0.5px 0px #868686, -0.5px -0.5px 0px #868686;

@@ -16,7 +16,6 @@ import CardForm from "../components/CardForm";
 
 export default {
   name: "AddCard",
-
   components: {
     Top,
     Card,
@@ -28,21 +27,23 @@ export default {
       cards: []
     };
   },
-
   methods: {
     update(input) {
       this.card = input;
     },
     add() {
-      if (localStorage.getItem("cards")) {
-        this.cards = JSON.parse(localStorage.getItem("cards"));
-        this.cards.push(this.card);
-        localStorage.setItem("cards", JSON.stringify(this.cards));
-      } else {
-        this.cards.push(this.card);
-        localStorage.setItem("cards", JSON.stringify(this.cards));
+      // If isValid is true, proceed to add card
+      if (this.card.isValid === true) {
+        if (localStorage.getItem("cards")) {
+          this.cards = JSON.parse(localStorage.getItem("cards"));
+          this.cards.push(this.card);
+          localStorage.setItem("cards", JSON.stringify(this.cards));
+        } else {
+          this.cards.push(this.card);
+          localStorage.setItem("cards", JSON.stringify(this.cards));
+        }
+        this.$router.push("/");
       }
-      this.$router.push("/");
     }
   }
 };

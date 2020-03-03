@@ -1,9 +1,11 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import VuePageTransition from "vue-page-transition";
 import Home from "../views/Home.vue";
 import AddCard from "../views/AddCard.vue";
 
 Vue.use(VueRouter);
+Vue.use(VuePageTransition);
 
 const routes = [
   {
