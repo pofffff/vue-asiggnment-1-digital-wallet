@@ -31,7 +31,7 @@ export default {
   },
   watch: {
     storedCards() {
-      this.cards = JSON.parse(this.storage);
+      this.cards = JSON.parse(this.storedCards);
     }
   },
   methods: {

@@ -1,4 +1,5 @@
 <template>
+  <!-- Watching any input in cardform-->
   <div class="form" @input="update">
     <label for="vendor">
       Vendor
@@ -64,11 +65,17 @@
 export default {
   data: () => {
     return {
+      // Inputs binded with v-model and using watch
+      // on each one to validate the input.
+      // If input is correct invalid {key} will be updated.
       vendor: "",
       number: "",
       holder: "",
       valid: "",
       cvc: "",
+
+      // If any key in invalid is true,
+      // add-button wont push route or add to local storage
       invalid: {
         vendor: false,
         number: false,
@@ -82,12 +89,14 @@ export default {
   watch: {
     // Validation of inputs
     vendor() {
+      // Can not be empty
       if (this.vendor === "") {
         this.invalid.vendor = true;
       } else {
         this.invalid.vendor = false;
       }
     },
+    // Regex functions are separated and found in methods
     number() {
       // Must be 16 numbers
       if (this.valNumber(this.number) === false) {
@@ -129,6 +138,7 @@ export default {
     }
   },
   methods: {
+    // This method emits every input to display on card
     update() {
       const input = {
         vendor: this.vendor,
@@ -136,9 +146,10 @@ export default {
         holder: this.holder,
         valid: this.valid,
         cvc: this.cvc,
+        // add-button will check "isValid" before proceed to add card
         isValid: false
       };
-      // Check if all validate: {keys} are false
+      // Check if all isValid: {keys} are false
       const allKeysFalse = Object.keys(this.invalid).every(
         k => !this.invalid[k]
       );
@@ -151,10 +162,10 @@ export default {
         }
       }
 
-      // Send to AddCard
+      // Emit to AddCard
       this.$emit("update", input);
     },
-    // Validation methods
+    // VALIDATION METHODS
     valNumber(number) {
       if (number.length < 16) {
         return false;
